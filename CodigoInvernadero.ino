@@ -2,7 +2,7 @@
 *Fecha:2023-12-08
 *@autor Valeria Bastidas Torres <valeriabastidas@unicauca.edu.co>
 *@autor Laura Sofia Botina Montero <laubotina@unicauca.edu.co>
-*@autor Miguel Angel Polo Gómez <mpolo@unicauca.edu.co>
+*@autor Miguel Ángel Polo Gómez <mpolo@unicauca.edu.co>
 
 @details: Este proyecto consiste en el control y monitoreo de un invernadero inteligente a traves de la medición de sensores de temperatura, humedad y luz**/
 
@@ -419,37 +419,46 @@ void loop()
 /*
 *@brief Solicita la usuario que ingrese una clave y verifica si es correcta
 */
-void  seguridad(){
-  do{
-    lcd.setCursor(0,0);
-    
+void seguridad() {
+  do {
+    unsigned long startTime = millis();
+    lcd.setCursor(0, 0);
     lcd.print("Ingresar clave:");
-    lcd.setCursor(0,1);
-    do{
+
+    lcd.setCursor(0, 1);
+    do {
       char key = keypad.getKey();
-      if (key){
+      if (key) {
         lcd.print('*');
         passIngresada += key;
+        startTime = millis();
       }
-    }while(passIngresada.length() != password.length());
+    } while (passIngresada.length() != password.length() && (millis() - startTime) < 5000);
+
+    if (passIngresada.length() != password.length()) {
+      lcd.clear();
+      lcd.print("Tiempo agotado");
+      delay(2500);
+      passIngresada = "";
+    }
 
     if (passIngresada.equals(password)) {
       lcd.clear();
       lcd.print("Clave correcta");
-      digitalWrite(LED_GREEN, HIGH);  
-      digitalWrite(LED_RED, LOW); 
+      digitalWrite(LED_GREEN, HIGH);
+      digitalWrite(LED_RED, LOW);
       digitalWrite(LED_BLUE, LOW);
-      delay(1200);                     
+      delay(1200);
       lcd.clear();
       passIngresada = "";
-      count =0;
-      currentInput=static_cast<Input>(Input:: sigEstCond);
+      count = 0;
+      currentInput = static_cast<Input>(Input::sigEstCond);
       break;
     } else {
       lcd.clear();
       lcd.print("Clave incorrecta");
-      digitalWrite(LED_BLUE,HIGH);
-      digitalWrite(LED_GREEN, LOW);  
+      digitalWrite(LED_BLUE, HIGH);
+      digitalWrite(LED_GREEN, LOW);
       digitalWrite(LED_RED, LOW);
       delay(1000);
       digitalWrite(LED_BLUE, LOW);
@@ -457,13 +466,14 @@ void  seguridad(){
       passIngresada = "";
       count += 1;
     }
-  }while(count != 3);   
-  digitalWrite(LED_BLUE,LOW);
+  } while (count != 3);
+
+  digitalWrite(LED_BLUE, LOW);
   digitalWrite(LED_GREEN, LOW);
   lcd.clear();
-  if(count == 3)
-  {
-    currentInput=static_cast<Input>(Input:: sigEstNoCond);
+
+  if (count == 3) {
+    currentInput = static_cast<Input>(Input::sigEstNoCond);
   }
 }
 
